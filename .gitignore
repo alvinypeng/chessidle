@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Distribution / packaging
+dist/
+*.egg-info/
+
+# Unit test / coverage reports
+.pytest_cache/
+
+# Environments
+venv*
+build/
+
+# Scripts
+*.bat

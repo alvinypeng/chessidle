@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=42.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chessidle"
+authors = [{ name = "Alvin Peng" }]
+description = "Python chess engine"
+readme = "README.md"
+license = { file = "LICENSE" }
+dynamic = ["version"]
+keywords = ["chess", "engine", "bot", "ai", "uci"]
+classifiers=[
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment :: Board Games",
+    "Topic :: Games/Entertainment :: Turn Based Strategy",
+]
+requires-python = ">= 3.9"
+
+[tool.setuptools.dynamic]
+version = {attr = "chessidle.__version__"}
+
+[project.optional-dependencies]
+numpy = ["numpy"]
+
+[project.scripts]
+chessidle = "chessidle.main:main"
+
+[project.urls]
+Homepage = "https://github.com/alvinypeng/chessidle"
