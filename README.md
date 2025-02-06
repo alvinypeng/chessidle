@@ -1,5 +1,6 @@
 <div align="center">
 
+<img src="https://github.com/user-attachments/assets/b125b54f-cd3f-4b50-9a63-95c918bd74cb" height="200">
 <h2>Chessidle</h2>
 
 </div>
