@@ -45,16 +45,19 @@ if TYPE_CHECKING:
 
 @dataclass
 class RootMove:
-    depth: int = 0
-    seldepth: int = 0
     score: int = -MATE
+    previous_score: int = -MATE
     mean_score: int = -MATE
+    seldepth: int = 0
     nodes: int = 0
     line: tuple[Move, ...] = ()
 
     @property
     def move(self) -> Move:
         return self.line[0]
+
+    def __lt__(self, other: RootMove) -> bool:
+        return (self.score, self.previous_score) < (other.score, other.previous_score)
     
 
 def standby(
@@ -112,9 +115,14 @@ def standby(
         nodes = total_nodes()
         
         for i, root_move in enumerate(root_moves[:options['MultiPV']], start=1):
-            string = f'info depth {root_move.depth} seldepth {root_move.seldepth} multipv {i} '
-            
-            if abs(score := root_move.score) <= MAX_EVAL:
+            string = f'info depth {root_depth} seldepth {root_move.seldepth} multipv {i} '
+
+            if (score := root_move.score) == -MATE:
+                score = root_move.previous_score
+            else:
+                score = max(alpha, min(score, beta))
+
+            if abs(score) <= MAX_EVAL:
                 string += f'score cp {score} '
             else:
                 string += f'score mate ' + '-' * (score < 0) + f'{(MATE - abs(score) + 1) // 2} '
@@ -442,10 +450,11 @@ def standby(
                     score if root_move.mean_score == -MATE else (root_move.mean_score + score) / 2)
         
                 if move_count == 1 or score > alpha:
-                    root_move.depth = root_depth
                     root_move.seldepth = seldepth
                     root_move.score = score
                     root_move.line = ply.line = (move,) + (ply + 1).line
+                else:
+                    root_move.score = -MATE
 
             if score > best_score:
                 best_score = score
@@ -727,6 +736,9 @@ def standby(
             
         for root_depth in range(1, max_depth + 1):
             searchable = limits.searchable.copy()
+
+            for root_move in root_moves:
+                root_move.previous_score = root_move.score
                 
             for root_index, root_move in enumerate(root_moves[:options['MultiPV']]):
                 depth = root_depth
@@ -747,7 +759,9 @@ def standby(
                         score = search(ply, depth, alpha, beta, False)
                     except SearchStopped:
                         break
-                    
+                    finally:
+                        root_moves.sort(reverse=True)
+
                     if (
                         MAIN_WORKER
                         and options['MultiPV'] == 1
@@ -774,8 +788,6 @@ def standby(
                         break
 
                     delta += delta // 3
-
-            root_moves.sort(reverse=True, key=lambda root_move: (root_move.depth, root_move.score))
 
             best_move = root_moves[0].move
             best_score = root_moves[0].score
