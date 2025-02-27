@@ -514,9 +514,10 @@ def standby(
         if (
             not in_check
             and best_move not in captures_promotions
-            and bound & (BOUND_UPPER if best_score >= ply.static_eval else BOUND_LOWER)
+            and (eval_error := ply.static_eval - best_score)
+            and (best_move if (eval_error < 0) else (best_score < beta))
         ):
-            bonus = (best_score - ply.static_eval) * min(1, depth / 8)
+            bonus = clamp_score(-eval_error * depth / 8, 250)
 
             non_pawn_correction_history[position, WHITE].update(int(bonus))
             non_pawn_correction_history[position, BLACK].update(int(bonus))
@@ -561,7 +562,7 @@ def standby(
             best_score = futility = -MATE
             
         else:
-            correction = 0
+            correction = get_correction(position, ply)
             
             if tt_hit:
                 raw_eval = tte.raw_eval
@@ -594,7 +595,7 @@ def standby(
                 alpha = eval_
 
             best_score = eval_
-            futility = best_score + 70
+            futility = ply.static_eval + 150
 
         best_move = Move.none()
 
@@ -678,7 +679,7 @@ def standby(
         b = non_pawn_correction_history[position, BLACK].value
         c = pawn_correction_history[position].value
 
-        return int((a + b) / 24 + c / 24)
+        return int((a + b) / 20 + c / 20)
             
     while True:
         barrier.wait()
