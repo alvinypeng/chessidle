@@ -269,9 +269,28 @@ def standby(
                 not is_pv
                 and depth < 8
                 and MAX_EVAL >= eval_ >= beta
-                and eval_ - 90 * (depth - improving) >= beta
+                and eval_ - 90 * depth + 90 * improving >= beta
             ):
                 return int(eval_ / 2 + beta / 2)
+
+            # Null move pruning.
+            if (
+                cut_node
+                and not skip
+                and eval_ >= beta >= -MAX_EVAL
+                and position.has_non_pawn(position.turn)
+                and (ply - 1).move != Move.null()
+            ):
+                r = 4.0 + depth / 4.0 + min(4.0, (eval_ - beta) / 200)
+
+                (ply).move = Move.null()
+                (ply).continuation_history = ContinuationHistory()
+                (ply + 1).position = position.do_null()
+
+                score = -search(ply + 1, depth - int(r), -beta, -beta + 1, False)
+
+                if MAX_EVAL >= score >= beta:
+                    return score
 
             if is_pv and not tt_move:
                 depth -= 1
