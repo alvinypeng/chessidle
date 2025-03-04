@@ -190,7 +190,6 @@ def standby(
         if (
             not is_pv
             and not skip
-            and tt_hit
             and tt_score != NO_SCORE
             and tte.depth >= depth
             and tte.bound & (BOUND_LOWER if tt_score >= beta else BOUND_UPPER)
@@ -570,7 +569,6 @@ def standby(
 
         if (
             not is_pv
-            and tt_hit
             and tt_score != NO_SCORE
             and tte.bound & (BOUND_LOWER if tt_score >= beta else BOUND_UPPER)
         ):
@@ -616,6 +614,8 @@ def standby(
             best_score = eval_
             futility = ply.static_eval + 150
 
+        previous_square = (ply - 1).move.to if (ply - 1).move else NO_SQUARE
+
         best_move = Move.none()
 
         picker = MovePicker(ply, tt_move, depth, history, capture_history)
@@ -636,7 +636,7 @@ def standby(
                     futility >= -MAX_EVAL
                     and not gives_check
                     and not move.is_promotion
-                    and not (move.to == (ply - 1).move.to and (ply - 1).move)
+                    and move.to != previous_square
                 ):
                     if move_count > 2:
                         continue
@@ -792,7 +792,7 @@ def standby(
 
                     if score <= alpha:
                         depth = root_depth
-                        beta = int((alpha + beta) / 2)
+                        beta = int(alpha / 2 + beta / 2)
                         alpha = max(alpha - delta, -MATE)
 
                         if MAIN_WORKER and use_time_management and root_index == 0:
