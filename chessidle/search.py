@@ -793,14 +793,14 @@ def standby(
                     if score <= alpha:
                         depth = root_depth
                         beta = int(alpha / 2 + beta / 2)
-                        alpha = max(alpha - delta, -MATE)
+                        alpha = max(score - delta, -MATE)
 
                         if MAIN_WORKER and use_time_management and root_index == 0:
                             time_allocated = time_max
 
                     elif score >= beta:
                         depth = max(depth - 1, 1)
-                        beta = min(beta + delta, MATE)
+                        beta = min(score + delta, MATE)
                         
                     else:
                         # Don't search the same move again.
