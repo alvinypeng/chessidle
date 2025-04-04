@@ -78,7 +78,7 @@ InCheck = bool
 IsCapture = bool
 Captured = Piece
 
-History: defaultdict[tuple[Color, Move], object] = _stats(10000)
-CaptureHistory: defaultdict[tuple[Captured, Move], object] = _stats(12000)
-ContinuationHistory: defaultdict[tuple[Piece, Square], object] = _stats(20000)
+History: defaultdict[tuple[Color, Move], object] = _stats(9465)
+CaptureHistory: defaultdict[tuple[Captured, Move], object] = _stats(9529)
+ContinuationHistory: defaultdict[tuple[Piece, Square], object] = _stats(20881)
 ContinuationHistories = defaultdict[tuple[InCheck, IsCapture, Piece, Move], ContinuationHistory]
