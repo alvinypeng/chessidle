@@ -171,9 +171,9 @@ class MovePicker:
                     + (move == ply.killer) * 1e7
                 )
 
-                threatened_minor_bonus = 7000
-                threatened_rook_bonus = 14000
-                threatened_queen_bonus = 28000
+                threatened_minor_bonus = 7367
+                threatened_rook_bonus = 13299
+                threatened_queen_bonus = 25206
 
                 if piece.type_ in (KNIGHT, BISHOP):                    
                     score += threatened_minor_bonus * bool(threatened_minor_area & (1 << from_))
@@ -188,7 +188,7 @@ class MovePicker:
                     score -= threatened_queen_bonus * bool(threatened_queen_area & (1 << to))
 
                 if position.check_squares[piece.type_] & (1 << to):
-                    score += 6000 
+                    score += 5952
                 
                 scored.append((score, move))
             

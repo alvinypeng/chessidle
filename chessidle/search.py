@@ -82,14 +82,14 @@ def standby(
     pawn_correction_history = PawnCorrectionHistory()
 
     def stat_bonus(depth: int) -> int:
-        return min(200 * depth - 100, 1600)
+        return min(239 * depth - 98, 1567)
     
     def stat_malus(depth: int) -> int:
-        return min(640 * depth - 200, 2000)
+        return min(646 * depth - 203, 1948)
 
     def reduction(depth: int, move_count: int, improving: int, delta: int) -> float:
-        r = math.log(depth) * math.log(move_count) / 2.5
-        return r + 1.0 * (r > 1.0 and not improving) - 1.0 * (delta / root_delta) + 1.0
+        r = math.log(depth) * math.log(move_count) / 2.528
+        return r + 1.189 * (r > 1.051 and not improving) - 1.153 * (delta / root_delta) + 0.949
         
     def draw_score() -> int:
         return 1 - (tally.nodes & 2)
@@ -254,7 +254,7 @@ def standby(
                 and not previous_move.is_promotion
                 and (ply - 1).static_eval != NO_SCORE
             ):
-                bonus = 400 - 10 * clamp_score(ply.static_eval + (ply - 1).static_eval, 200)
+                bonus = 337 - 10 * clamp_score(ply.static_eval + (ply - 1).static_eval, 196)
                 history[not position.turn, previous_move].update(bonus)                
                 
             improving = ply.static_eval > (ply - 2).static_eval
@@ -268,7 +268,7 @@ def standby(
                 not is_pv
                 and depth < 8
                 and MAX_EVAL >= eval_ >= beta
-                and eval_ - 90 * depth + 90 * improving >= beta
+                and eval_ - 72 * depth + 80 * improving >= beta
             ):
                 return int(eval_ / 2 + beta / 2)
 
@@ -280,7 +280,7 @@ def standby(
                 and position.has_non_pawn(position.turn)
                 and (ply - 1).move != Move.null()
             ):
-                r = 4.0 + depth / 4.0 + min(4.0, (eval_ - beta) / 200)
+                r = 3.673 + depth / 3.382 + min(4.699, (eval_ - beta) / 222)
 
                 (ply).move = Move.null()
                 (ply).continuation_history = ContinuationHistory()
@@ -337,7 +337,7 @@ def standby(
 
                 if is_capture or gives_check or move.is_promotion:
 
-                    if not see(position, move, -90 * depth):
+                    if not see(position, move, -95 * depth):
                         continue
                     
                 else:
@@ -345,18 +345,18 @@ def standby(
 
                     if (
                         + (ply - 1).continuation_history[piece, move.to].value
-                        + (ply - 2).continuation_history[piece, move.to].value < -4000 * depth
+                        + (ply - 2).continuation_history[piece, move.to].value < -4017 * depth
                     ):
                         continue
 
                     if (
                         not in_check
                         and reduced_depth < 7
-                        and eval_ + 90 + 50 * reduced_depth <= alpha
+                        and eval_ + 81 + 44 * reduced_depth <= alpha
                     ):
                         continue
 
-                    if not see(position, move, -20 * reduced_depth * reduced_depth):
+                    if not see(position, move, -21 * reduced_depth * reduced_depth):
                         continue
         
             extension = 0           
@@ -399,25 +399,25 @@ def standby(
             starting_node_count = tally.nodes
 
             if cut_node:
-                r += 2.0
+                r += 1.854
 
             if is_pv or was_pv:
-                r -= 1.0
+                r -= 1.129
 
             if tt_hit:
-                r -= 1.0 * (tte.depth >= depth)
+                r -= 1.111 * (tte.depth >= depth)
 
             if (ply + 1).cutoffs > 4:
-                r += 1.0
+                r += 0.876
 
             elif move == tt_move:
-                r -= 2.0
+                r -= 2.054
 
             if is_capture or move.is_promotion:
                 captures_promotions.append(move)
 
                 h = capture_history[captured, move].value
-                r -= (h - 4000) / 15000
+                r -= (h - 3782) / 12916
 
             else:
                 non_captures_promotions.append(move)
@@ -427,9 +427,9 @@ def standby(
                     + (ply - 1).continuation_history[piece, move.to].value
                     + (ply - 2).continuation_history[piece, move.to].value
                 )
-                r -= (h - 4000) / 15000
+                r -= (h - 3908) / 13552
 
-                r += 1.0 * (tt_move in captures_promotions)
+                r += 1.004 * (tt_move in captures_promotions)
 
             # Late move reduction.
             if depth >= 2 and move_count > 1:
@@ -439,7 +439,7 @@ def standby(
                 score = -search(ply + 1, reduced_depth, -alpha - 1, -alpha, True)
 
                 if score > alpha and new_depth > reduced_depth:
-                    new_depth += (score > best_score + 70)
+                    new_depth += (score > best_score + 76)
                     new_depth -= (score < best_score + 1 * new_depth)
 
                     if new_depth > reduced_depth:
@@ -449,9 +449,9 @@ def standby(
                         update_continuation_histories(ply, move, stat_bonus(new_depth))
 
             elif not is_pv or move_count > 1:
-                r += 2.0 * (not tt_move)
+                r += 1.989 * (not tt_move)
                 
-                score = -search(ply + 1, new_depth - (r > 3.0), -alpha - 1, -alpha, not cut_node)
+                score = -search(ply + 1, new_depth - (r > 3.600), -alpha - 1, -alpha, not cut_node)
 
             if is_pv and (move_count == 1 or score > alpha):
                 score = -search(ply + 1, new_depth, -beta, -alpha, False)
@@ -612,7 +612,7 @@ def standby(
                 alpha = eval_
 
             best_score = eval_
-            futility = ply.static_eval + 150
+            futility = ply.static_eval + 148
 
         previous_square = (ply - 1).move.to if (ply - 1).move else NO_SQUARE
 
@@ -698,7 +698,7 @@ def standby(
         b = non_pawn_correction_history[position, BLACK].value
         c = pawn_correction_history[position].value
 
-        return int((a + b) / 20 + c / 20)
+        return int((a + b) / 18 + c / 19)
             
     while True:
         barrier.wait()
@@ -768,7 +768,7 @@ def standby(
 
                 if root_depth >= 5:
                     mean_score = root_move.mean_score
-                    delta = 11
+                    delta = 9
                     alpha = max(mean_score - delta, -MATE)
                     beta = min(mean_score + delta, MATE)
                 
@@ -793,14 +793,14 @@ def standby(
                     if score <= alpha:
                         depth = root_depth
                         beta = int(alpha / 2 + beta / 2)
-                        alpha = max(alpha - delta, -MATE)
+                        alpha = max(score - delta, -MATE)
 
                         if MAIN_WORKER and use_time_management and root_index == 0:
                             time_allocated = time_max
 
                     elif score >= beta:
                         depth = max(depth - 1, 1)
-                        beta = min(beta + delta, MATE)
+                        beta = min(score + delta, MATE)
                         
                     else:
                         # Don't search the same move again.
