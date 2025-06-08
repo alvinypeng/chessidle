@@ -24,12 +24,17 @@ endif
 # Use numpy (yes/no)
 numpy ?= yes
 
+# Set extra PyInstaller options if numpy is used
+ifeq ($(numpy), yes)
+    PYI_NP_EXTRA = --collect-all=numpy
+endif
+
 all: $(VENV)
 	$(BIN)/pip install --upgrade pyinstaller
 ifeq ($(numpy), yes)
 	$(BIN)/pip install --upgrade numpy
 endif
-	$(BIN)/pyinstaller --onefile --distpath "." -n $(EXE) main.py
+	$(BIN)/pyinstaller --onefile --distpath "." -n $(EXE) $(PYI_NP_EXTRA) main.py
 
 $(VENV):
 	$(PY) -m venv $(VENV)
